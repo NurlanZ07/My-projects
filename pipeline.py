@@ -24,10 +24,6 @@ def counts_in_ranges(records):
 
 
 def uni_emails(records):
-    emails=[]
-    for record in records:
-        emails.append(record['email'])
-    print(f'The number of unique emails: {len(set(emails))}')
     print(f'The number of unique emails: {len({r['email'] for r in records})}')
 
 def avg(records,key):
