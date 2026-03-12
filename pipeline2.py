@@ -7,6 +7,16 @@ import sys
 from faker import Faker
 fake=Faker()
 
+def missing_values():
+    
+
+def show_summary():
+    print(f'The number of records: {len(dataset)}')
+    for line in dataset:
+        if name=='invalid name' or age=='invalid age' or email=='invalid email' or not 0<=score<=1 or country=='invalid country' or time='invalid time':
+
+
+
 def load_json():
     dataset_file=input()
     with open(dataset_file) as file:
@@ -17,12 +27,30 @@ def load_json():
 def generate_syn_dataset(dataset,id):
     id=1
     for _ in range(100):
-        name=fake.name()    
-        age=random.randint(1,100):
-        email=fake.email()
-        score=round(random.random())
-        country=fake.country()
-        time=dt.datetime.now().date()
+        if random.random()<0.03:
+            name='invalid name'
+        else:
+            name=fake.name()    
+        if random.ranmdon()<0.05:
+            age='invalid age'
+        else:
+            age=random.randint(1,100):
+        if random.random()<0.1:
+            email='invalid email'
+        else:
+            email=fake.email()
+        if random.random()<0.08:
+             score=round(random.random(-0.5,1.5))
+        else:
+            score=round(random.random())
+        if random.random<0.05:
+            country='invalid country'
+        else:
+            country=fake.country()
+        if random.random()<0.05:
+            time='invalid time'
+        else:
+            time=dt.datetime.now().date()
         record={
             'id':id,
             'name':name,
@@ -35,10 +63,6 @@ def generate_syn_dataset(dataset,id):
         dataset.append(record)
         id+=1
     return dataset
-
-
-
-
 
 
 def main():
@@ -55,6 +79,7 @@ def main():
                 dataset=load_json()
 
             case 3:
+                show_summary():
 
             case 4:
 
