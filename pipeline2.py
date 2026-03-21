@@ -45,6 +45,7 @@ def min_max(dataset,key):
 
 
 def stats(dataset,avg_score,std):
+    avg_score=st.mean([record['score'] for record in dataset])
     min_max(dataset,'score')
     print(f'The standart deviation of scores is {std}')
 
@@ -55,7 +56,7 @@ def stats(dataset,avg_score,std):
 
 def anomaly_detection(dataset,avg_score):
     sum=0
-    scores=[record['score' for record in dataset]]
+    scores=[record['score'] for record in dataset]
     for score in scores:
         sum+=(score-avg_score)**2
 
@@ -72,7 +73,7 @@ def anomaly_detection(dataset,avg_score):
     
 
 
-def cleaning(dataset,avg_score):
+def cleaning(dataset):
     for record in dataset:
         if record['score']>1:
             record['score']=1
@@ -83,7 +84,10 @@ def cleaning(dataset,avg_score):
         elif record['email']=='invalid':
             dataset.remove(record)
         elif not record['score']:
-            record['score']=avg_score
+            record['score']=st.mean([record['score'] for record in dataset])
+        elif record['time']=='invalid':
+            dataset.remove(record)
+    return dataset
 
     
 
@@ -100,6 +104,7 @@ def validation(dataset):
             dataset[num]['valid']=False
         else:
             dataset[num]['valid']=True
+        return dataset
 
             
             
@@ -113,7 +118,7 @@ def time_comparison(dataset):
 def avg_score(dataset):
     sum=0
     count=len(dataset)
-    for num in len(range(dataset)):
+    for num in range(len(dataset)):
         try:
            sum+=dataset[num]['score']
         except ValueError:
@@ -136,10 +141,17 @@ def duplicate_emails(dataset):
 
 
 def missing_values(dataset):
-    for num in range(1,len(dataset)+1):
+    for num in range(len(dataset)):
         for key in dataset[num].keys():
-            if dataset[num][key]=='invalid' or not 0<=dataset[num][key]<=1:
-                print(f'The {num}th line of dataset is missing {key}')
+            try:
+                if dataset[num][key]=='invalid' :
+                    print(f'The {num}th line of dataset is missing {key}')
+                elif not 0<=dataset[num][key]<=1:
+                    print(f'The {num}th line of dataset is missing {key}')
+
+            except TypeError:
+                pass
+            
 
 def show_summary(dataset):
     print(f'The number of records: {len(dataset)}')
@@ -153,14 +165,15 @@ def show_summary(dataset):
 
 
 def load_json():
-    dataset_file=input()
-    with open(dataset_file) as file:
+    json_file=input('Which file?')
+    with open(json_file) as file:
         dataset=json.load(file)
-    return dataset
+    return dataset,json_file
 
 
-def generate_syn_dataset(dataset,id):
+def generate_syn_dataset(dataset):
     id=1
+    real_id=id
     for _ in range(100):
         if random.random()<0.06:
             id='invalid'
@@ -168,19 +181,19 @@ def generate_syn_dataset(dataset,id):
             name='invalid'
         else:
             name=fake.name()    
-        if random.ranmdon()<0.05:
+        if random.random()<0.05:
             age='invalid'
         else:
-            age=random.randint(1,100):
+            age=random.randint(1,100)
         if random.random()<0.1:
             email='invalid'
         else:
             email=fake.email()
         if random.random()<0.08:
-             score=round(random.random(-0.5,1.5))
+             score=round(random.uniform(-0.5,1.5))
         else:
             score=round(random.random())
-        if random.random<0.05:
+        if random.random()<0.05:
             country='invalid'
         else:
             country=fake.country()
@@ -198,43 +211,44 @@ def generate_syn_dataset(dataset,id):
             'time':time,
         }
         dataset.append(record)
-        id+=1
+        id=real_id+1
     return dataset
 
 
 def main():
     dataset=[]
     while True:
-        choice=int(input('AI DATA PIPELINE TOOL\n1 Generate synthetic dataset\n2 Load dataset from JSON\n3 Show dataset summary\n4 Validate dataset\n5 Clean dataset\n6 Detect anomalies\n7 Generate statistics\n8 Train/Test split\n9 Export cleaned dataset\n10 Exit\n\n Enter your choice: '))
+        choice=int(input('AI DATA PIPELINE TOOL\n1 Generate synthetic dataset\n2 Load dataset from JSON\n3 Show dataset summary\n4 Validate dataset\n5 Clean dataset\n6 Detect anomalies\n7 Generate statistics\n8 Export cleaned dataset\n9 Exit\n Enter your choice: '))
         
         match choice:
             
             case 1:
-                dataset=generate_syn_dataset()
+                dataset=generate_syn_dataset(dataset)
 
             case 2:
-                dataset=load_json()
+                dataset,json_file=load_json()
+                print(dataset)
 
             case 3:
                 avg_score=show_summary(dataset)
 
             case 4:
-                validation(dataset)
+                dataset=validation(dataset)
 
             case 5:
-                cleaning(dataset,avg_score
-                         )
+                dataset=cleaning(dataset)
             case 6:
                 std=anomaly_detection(dataset)
 
             case 7:
-                stats(dataset,avg_score,std)
+                stats(dataset,std)
 
             case 8:
-
+                json.dump(dataset,json_file)
             case 9:
-
-            case 10:
-
+                sys.exit()
             case _:
                 print('There is no such choice.')
+
+if __name__=='__main__':
+    main()
