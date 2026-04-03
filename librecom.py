@@ -1,45 +1,11 @@
 import  csv
 
 class Library:
+    instance_created_lib=True
+
     def __init__(self):
-        self.users = [
-    {
-        "name": "Alice",
-        "borrowed_books": [],
-        "ratings": {
-            "Harry Potter": 5,
-            "The Hobbit": 4
-        }
-    },
-    {
-        "name": "Bob",
-        "borrowed_books": [],
-        "ratings": {
-            "Harry Potter": 4,
-            "Game of Thrones": 5
-        }
-    },
-    {
-        "name": "Charlie",
-        "borrowed_books": [],
-        "ratings": {
-            "The Hobbit": 5,
-            "Game of Thrones": 3
-        }
-    }
-]
-        
-        self.books = [
-            PhysicalBook("Harry Potter", "J.K. Rowling", "Fantasy", 3, "Shelf A3"),
-            PhysicalBook("The Hobbit", "J.R.R. Tolkien", "Fantasy", 2, "Shelf B1"),
-            PhysicalBook("Game of Thrones", "George R.R. Martin", "Fantasy", 1, "Shelf C2")
-]
-
-
-        self.books += [
-            eBook("1984", "George Orwell", "Dystopian", 5, 2.0, "PDF"),
-            eBook("Brave New World", "Aldous Huxley", "Dystopian", 3, 1.5, "EPUB")
-        ]
+        self.users = []
+        self.books = []
     
     def add_user(self):
         new_user=User(name=input('Enter the name: '))
@@ -53,22 +19,26 @@ class Library:
             new_book=eBook('Enter these: title, author, genre, copies,file_size,format.')
         self.books.append(new_book)
     def borrow_book(self,user, book):
-        if book in self.books:
-            user.borrowed_books.append(book)
-            exist=True
-        else:
+        for bookl in self.books:
+            if book==bookl.title:
+                user.borrowed_books.append(book)
+                exist=True
+                return exist
+
+        if exist==False:
             print('There is no such registrated book.')
-            exist=False
-        return exist
+            return exist
+        
 
     def return_book(self,user, book):
-        if book in self.borrowed_books:
-            user.borrowed_books.remove(book)
-            exist=True
-        else:
+        for bookl in self.books:
+            if book==bookl.title:
+                user.borrowed_books.remove(book)
+                exist=True
+
+        if exist==False:
             print('There is no such borrowed book.')
-            exist=False
-        return exist
+            return exist
             
     def recommend_books(self,user):
         for other in self.users:
@@ -76,6 +46,22 @@ class Library:
             if similarity>=0.5:
                 print(f'{other._ratings.keys()-self.__ratings.keys()} are recomended by {other.name}')
     
+    def validation(self,user):
+        while True:
+            user=input('Enter the user`s name: ')
+            for userl in self.users:
+                if user==userl.title:
+                    return True
+            return False
+                    
+            
+
+
+
+            
+
+
+
     def loading_lib_data(self):
         with open('books.csv','a',newline='') as f:
             writer=csv.DictWriter(f)
@@ -97,6 +83,8 @@ class Library:
 
 
 class User:
+    instance_created_user=True
+
     def __init__(self,name):
         self.name=name
         self.__borrowed_books=[]
@@ -108,7 +96,7 @@ class User:
         if exist:
             self.__borrowed_books.append(book)            
 
-    def return_book(self,lib,book):
+    def return_book_user(self,lib,book):
         exist=lib.return_book(self,book)
         if exist:
             self.__borrowed_books.remove(book)
@@ -159,6 +147,8 @@ class User:
                     record.append(value2)
                 record.append(value)
                 writer.writerow(record)
+
+    
         
 
 class Book:
@@ -192,10 +182,53 @@ class PhysicalBook(Book):
 
 
 def main():
+    instance_created_lib=False
+    instance_created_user=False
+
+
     while True:
-        try:
-            ask=int(input('1.Show the list of users\n2.Show the list of the book\n3.Add a book\n4.Add a user\n5Borrow a book\n6.Return a book\n7.Rate a book\n8.Save all the data'))
+
+        lib=Library()
+
+
+        ask=input('1.Show the list of the books\n2.Show the list of the users\n3.Add a book\n4.Add a user\n5Borrow a book\n6.Return a book\n7.Rate a book\n8.Save all the data')
             
 
         match ask:
-            case 
+            case '1':
+                print(lib.books)
+            case '2':
+                print(lib.users)
+            case '3':
+                lib.add_book()
+            case '4':
+                lib.add_user()
+            case '5': 
+                while True:
+                    if lib.validation(user=input('Enter the user`s name: ')):
+                        break                        
+                user.borrow(lib,book=input('Enter the name of the book:'))
+
+            case '6':
+
+                if lib.validation():
+
+
+                    user.return_book_user(lib,book=input('Enter the name of the book:'))
+
+            case '7':
+
+                 while True:
+                    user=input('Enter the user`s name: ')
+                    if lib.validation(user):
+                        break
+
+                
+                    
+
+
+                    
+
+
+
+            
