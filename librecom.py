@@ -14,53 +14,36 @@ class Library:
     def add_book(self):
         type_of_book=input('Is the book physcial or ebook?').strip().lower()
         if type_of_book=='physcial':
-            new_book=PhysicalBook(name=input('Enter these:  title, author, genre, copies,shelf_location.'))
+            data=input('Enter these:  title, author, genre, copies,shelf_location.').split(',')
+            new_book=PhysicalBook(*data)
         elif type_of_book=='ebook':
-            new_book=eBook('Enter these: title, author, genre, copies,file_size,format.')
+            data=input('Enter these: title, author, genre, copies,file_size,format.').split(',')
+            new_book=eBook(*data)
         self.books.append(new_book)
-    def borrow_book(self,user, book):
-        for bookl in self.books:
-            if book==bookl.title:
-                user.borrowed_books.append(book)
-                exist=True
-                return exist
 
-        if exist==False:
-            print('There is no such registrated book.')
-            return exist
-        
-
-    def return_book(self,user, book):
-        for bookl in self.books:
-            if book==bookl.title:
-                user.borrowed_books.remove(book)
-                exist=True
-
-        if exist==False:
-            print('There is no such borrowed book.')
-            return exist
-            
     def recommend_books(self,user):
         for other in self.users:
             similarity=len(user.__ratings&other.__ratings)/len(user.__ratings|other.__ratings)
             if similarity>=0.5:
                 print(f'{other._ratings.keys()-self.__ratings.keys()} are recomended by {other.name}')
     
-    def validation(self,user):
+    def validating_user(self,user,):
         while True:
             user=input('Enter the user`s name: ')
             for userl in self.users:
                 if user==userl.title:
-                    return True
-            return False
-                    
-            
+                    return user
+                else:
+                    print('There is no such user.')
 
-
-
-            
-
-
+    def validating_book(self,book):
+        while True:
+            book=input('Enter the book`s name: ')
+            for bookl in self.books:
+                if book==bookl.title:
+                    return book
+                else:
+                    print('There is no such book.')
 
     def loading_lib_data(self):
         with open('books.csv','a',newline='') as f:
@@ -80,8 +63,6 @@ class Library:
                 writer.writerow(record)
         
 
-
-
 class User:
     instance_created_user=True
 
@@ -92,26 +73,12 @@ class User:
 
 
     def borrow(self,lib,book):
-        exist=lib.borrow_book(self,book)
-        if exist:
-            self.__borrowed_books.append(book)            
+        self.__borrowed_books.append(book)            
 
-    def return_book_user(self,lib,book):
-        exist=lib.return_book(self,book)
-        if exist:
-            self.__borrowed_books.remove(book)
+    def return_book(self,lib,book):
+        self.__borrowed_books.remove(book)
 
-    def rate_book(self):
-        type_of_book=input('Is the book physcial or ebook?').strip().lower()
-
-        if type_of_book=="ebook":
-            rated_book=eBook(input('Enter these:  title, author, genre, copies,shelf_location.'))
-        elif type_of_book=="physical":
-            rated_book=PhysicalBook(input('Enter these:  title, author, genre, copies,shelf_location.'))
-        else:
-            print('There is no such kind of book.')
-
-
+    def rate_book(self,lib,rated_book):
         while True:
             try:
                 score=int(input('Enter the score: '))
@@ -129,6 +96,10 @@ class User:
                 self.__ratings[rated_book]=score
         else:
             self.__ratings[rated_book]=score
+
+    def info(self):
+        return f'{self.name} has {len(self.__borrowed_books)} number of books and {len(self.__ratings)} number of ratings'
+
 
     def loading_user_data(self):
         with open('borrowed_books.csv','a',newline='') as f:
@@ -152,16 +123,19 @@ class User:
         
 
 class Book:
+    
     def __init__(self,title,author,genre,copies):
         self.title=title
         self.author= author
         self.genre=genre
         self.copies=copies
 
-    def info(self,title):
+    def info(self):
         return f'{self.title} by {self.author} is a {self.genre} book with {self.copies} number of copies.'
 
 class eBook(Book):
+
+
     def __init__(self, title, author, genre, copies,file_size,format):
         super().__init__(title, author, genre, copies)
         self.file_size=file_size
@@ -181,47 +155,54 @@ class PhysicalBook(Book):
         return base + f'\nFile shelf location: {self.shelf_location}.'
 
 
+
 def main():
     instance_created_lib=False
     instance_created_user=False
-
 
     while True:
 
         lib=Library()
 
-
-        ask=input('1.Show the list of the books\n2.Show the list of the users\n3.Add a book\n4.Add a user\n5Borrow a book\n6.Return a book\n7.Rate a book\n8.Save all the data')
+        choice=input('1.Show the list of the books\n2.Show the list of the users\n3.Add a book\n4.Add a user\n5.Borrow a book\n6.Return a book\n7.Rate a book\n8.Save all the data\nWhich one do you choose? ')
             
-
-        match ask:
+        match choice:
             case '1':
-                print(lib.books)
+                for book in lib.books:
+                    print(book.info())
             case '2':
-                print(lib.users)
+                for user in lib.user:
+                    print(user.info())
             case '3':
                 lib.add_book()
             case '4':
                 lib.add_user()
             case '5': 
-                while True:
-                    if lib.validation(user=input('Enter the user`s name: ')):
-                        break                        
-                user.borrow(lib,book=input('Enter the name of the book:'))
+                user=lib.validating_user()
+                book=lib.validating_book()
+                user.borrow(lib,book)
 
             case '6':
-
-                if lib.validation():
-
-
-                    user.return_book_user(lib,book=input('Enter the name of the book:'))
+                user=lib.validating_user()
+                book=lib.validating_book()
+                user.return_book(lib,book)
 
             case '7':
+                user=lib.validating_user()
+                rated_book=lib.validating_book()
+                user.rate_book(lib,rated_book)
 
-                 while True:
-                    user=input('Enter the user`s name: ')
-                    if lib.validation(user):
-                        break
+            case '8':   
+                lib.loading_lib_data()
+                if instance_created_user:
+                    user=lib.validating_user
+                    user.loading_user_data()
+                else:
+                    print('You haven`t created any user yet. ')
+
+
+if __name__=='__main__':
+    main()
 
                 
                     
