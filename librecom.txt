@@ -1,7 +1,0 @@
-1.I connect user and library classes +
-2.I apply encapsulation
-3.I do recommendation system
-4.I handle files
-
-
-im gonna do rating by finding the file form lib data
